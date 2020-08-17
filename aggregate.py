@@ -18,9 +18,9 @@ def write_to_rds(**kwargs):
     cur.execute(
         query='''
             INSERT INTO `tbl_designer_agg`
-            ( `designer`, `date`, `cnt`, `view`, `regdate`)
+            ( `designer`, `community_seq`, `date`, `cnt`, `view`, `regdate`)
             VALUES
-            ( %(designer)s, %(date)s, %(cnt)s, %(view)s, NOW());
+            ( %(designer)s, %(community_seq)s, %(date)s, %(cnt)s, %(view)s, NOW());
         ''',
         args=kwargs)
     cur.close()
@@ -88,19 +88,36 @@ if __name__ == '__main__':
         pdesigner = designer[1]
         now = datetime.now(timezone("Asia/Seoul"))
         pdate = now.strftime("%Y.%m.%d.")
+        
+        # pdate = '2020.08.03.'
 
         rows = query_designers(pdesigner, pdate)
         cnt = 0
         view = 0
+        tempDict = {}
         for row in rows:
-            cnt = cnt + 1
-            view = view + int(row['view'].replace(',',''))
+            if  len(tempDict) == 0:
+                tempDict[int(row['community_seq'])] = [1, int(row['view'].replace(',',''))]                
+            else:
+                if not int(row['community_seq']) in tempDict:
+                    tempDict[int(row['community_seq'])] = [1, int(row['view'].replace(',',''))]
+                else:
+                    tempDict[int(row['community_seq'])][0] = int(tempDict[int(row['community_seq'])][0]) + 1 # cnt
+                    tempDict[int(row['community_seq'])][1] = int(tempDict[int(row['community_seq'])][1]) + int(row['view'].replace(',','')) # view
 
-        #aggregate insert
-        write_to_rds(
-            designer=pdesigner,
-            date=pdate,
-            cnt=cnt,
-            view=view
-        )
+
+        # 다했으면
+        print("pdesigner:", pdesigner)
+        for key in tempDict.keys():            
+            # print("community_seq:", int(key))
+            # print("cnt:", int(tempDict[key][0]))
+            # print("view:", int(tempDict[key][1]))
+            #aggregate insert
+            write_to_rds(
+                designer=pdesigner,
+                community_seq=int(key),
+                date=pdate,
+                cnt=int(tempDict[key][0]),
+                view=int(tempDict[key][1])
+            )
             
