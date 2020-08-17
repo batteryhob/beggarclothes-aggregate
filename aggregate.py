@@ -1,9 +1,12 @@
 import boto3
 from boto3.dynamodb.conditions import Key
 import configparser
+import pymysql
+
+from pytz import timezone
+from datetime import datetime
 import time
 
-import pymysql
 
 # Nas Insert
 def write_to_rds(**kwargs):
@@ -14,15 +17,35 @@ def write_to_rds(**kwargs):
     cur = con.cursor()
     cur.execute(
         query='''
-            INSERT INTO `tbl_saleinfo`
-            ( `from`, `subject`, `content`, `saleflag`, `view`, `like`, `regdate`)
+            INSERT INTO `tbl_designer_agg`
+            ( `designer`, `date`, `cnt`, `view`, `regdate`)
             VALUES
-            ( %(fromstore)s, %(subject)s, %(content)s, %(sale)s, 0, 0, NOW());
+            ( %(designer)s, %(date)s, %(cnt)s, %(view)s, NOW());
         ''',
         args=kwargs)
     cur.close()
     con.commit()
     con.close()
+
+
+def get_designers():
+    config = configparser.ConfigParser()
+    config.read('/app/config.ini', encoding='utf-8')
+
+    con = pymysql.connect(host=config['Nas']['HOST'], port=3307, user=config['Nas']['USER'], passwd=config['Nas']['PASSWORD'], db=config['Nas']['NAME'], charset='utf8')
+    cur = con.cursor()
+    cur.execute(
+        query='''
+            SELECT 
+            `tag`, `name`, `designer_seq` 
+            FROM tbl_designer_tags A
+            LEFT JOIN tbl_designer B
+            ON A.designer_seq = B.seq
+            WHERE `use` = true
+        ''')
+    rows = cur.fetchall()
+    con.close()
+    return rows
 
 
 def query_designers(pdesigner, pdate, dynamodb=None):
@@ -58,8 +81,26 @@ def query_designers(pdesigner, pdate, dynamodb=None):
 
 
 if __name__ == '__main__':
-    pdesigner = 'ADER error'
-    pdate = '2020.01.07.'
-    rows = query_designers(pdesigner, pdate)
-    for row in rows:
-        print(row)
+
+    targetDesigners = get_designers()    
+    for designer in targetDesigners:
+
+        pdesigner = designer[1]
+        now = datetime.now(timezone("Asia/Seoul"))
+        pdate = now.strftime("%Y.%m.%d.")
+
+        rows = query_designers(pdesigner, pdate)
+        cnt = 0
+        view = 0
+        for row in rows:
+            cnt = cnt + 1
+            view = view + int(row['view'].replace(',',''))
+
+        #aggregate insert
+        write_to_rds(
+            designer=pdesigner,
+            date=pdate,
+            cnt=cnt,
+            view=view
+        )
+            

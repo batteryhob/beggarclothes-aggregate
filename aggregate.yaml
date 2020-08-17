@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: aggregate-1
 spec:
-  schedule: "*/5 * * * *"
+  schedule: "55 23 * * *"
   jobTemplate:
     spec:
       template:

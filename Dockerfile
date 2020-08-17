@@ -17,6 +17,7 @@ COPY . /app
 RUN pip3 install configparser
 RUN pip3 install pymysql
 RUN pip3 install boto3
+RUN pip3 install pytz
 
 ENV LC_ALL=C.UTF-8
 ENV PYTHONUNBUFFERED 0
