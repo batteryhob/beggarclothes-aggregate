@@ -89,21 +89,26 @@ if __name__ == '__main__':
         now = datetime.now(timezone("Asia/Seoul"))
         pdate = now.strftime("%Y.%m.%d.")
         
-        # pdate = '2020.08.03.'
+        # pdate = '2020.08.08.'
 
         rows = query_designers(pdesigner, pdate)
         cnt = 0
         view = 0
         tempDict = {}
-        for row in rows:
+        for row in rows:            
+            if '만' in row['view']:
+                viewcnt = float(row['view'].replace('만','')) * 10000
+            else:
+                viewcnt = int(row['view'].replace(',',''))
+
             if  len(tempDict) == 0:
-                tempDict[int(row['community_seq'])] = [1, int(row['view'].replace(',',''))]                
+                tempDict[int(row['community_seq'])] = [1, viewcnt]                
             else:
                 if not int(row['community_seq']) in tempDict:
-                    tempDict[int(row['community_seq'])] = [1, int(row['view'].replace(',',''))]
+                    tempDict[int(row['community_seq'])] = [1, viewcnt]
                 else:
                     tempDict[int(row['community_seq'])][0] = int(tempDict[int(row['community_seq'])][0]) + 1 # cnt
-                    tempDict[int(row['community_seq'])][1] = int(tempDict[int(row['community_seq'])][1]) + int(row['view'].replace(',','')) # view
+                    tempDict[int(row['community_seq'])][1] = int(tempDict[int(row['community_seq'])][1]) + viewcnt # view
 
 
         # 다했으면
