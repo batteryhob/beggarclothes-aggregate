@@ -37,11 +37,8 @@ def get_designers():
     cur.execute(
         query='''
             SELECT 
-            `tag`, `name`, `designer_seq` 
-            FROM tbl_designer_tags A
-            LEFT JOIN tbl_designer B
-            ON A.designer_seq = B.seq
-            WHERE `use` = true
+            `seq`, `name`, `korean`
+            FROM tbl_designer
         ''')
     rows = cur.fetchall()
     con.close()
@@ -87,10 +84,8 @@ if __name__ == '__main__':
 
         pdesigner = designer[1]
         now = datetime.now(timezone("Asia/Seoul"))
-        pdate = now.strftime("%Y.%m.%d.")
+        pdate = now.strftime("%Y.%m.%d.")  
         
-        # pdate = '2020.08.08.'
-
         rows = query_designers(pdesigner, pdate)
         cnt = 0
         view = 0
@@ -114,9 +109,9 @@ if __name__ == '__main__':
         # 다했으면
         print("pdesigner:", pdesigner)
         for key in tempDict.keys():            
-            # print("community_seq:", int(key))
-            # print("cnt:", int(tempDict[key][0]))
-            # print("view:", int(tempDict[key][1]))
+            print("community_seq:", int(key))
+            print("cnt:", int(tempDict[key][0]))
+            print("view:", int(tempDict[key][1]))
             #aggregate insert
             write_to_rds(
                 designer=pdesigner,
