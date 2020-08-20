@@ -79,13 +79,13 @@ def query_designers(pdesigner, pdate, dynamodb=None):
 
 if __name__ == '__main__':
 
-    targetDesigners = get_designers()    
+    targetDesigners = get_designers()
     for designer in targetDesigners:
 
         pdesigner = designer[1]
         now = datetime.now(timezone("Asia/Seoul"))
         pdate = now.strftime("%Y.%m.%d.")  
-        
+
         rows = query_designers(pdesigner, pdate)
         cnt = 0
         view = 0

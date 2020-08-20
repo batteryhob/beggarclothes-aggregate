@@ -13,7 +13,7 @@ spec:
         spec:
           containers:
           - name: aggregate-1
-            image: batteryho/aggregate:v0.3
+            image: batteryho/aggregate:v0.4
             imagePullPolicy: IfNotPresent
             ports:
             - containerPort: 8300
