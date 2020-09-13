@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: aggregate-1
 spec:
-  schedule: "55 23 * * *"
+  schedule: "5 8 * * *"
   jobTemplate:
     spec:
       template:
@@ -13,8 +13,8 @@ spec:
         spec:
           containers:
           - name: aggregate-1
-            image: batteryho/aggregate:v0.4
+            image: batteryho/aggregate:v0.7
             imagePullPolicy: IfNotPresent
             ports:
-            - containerPort: 8300
+            - containerPort: 8999
           restartPolicy: Never

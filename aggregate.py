@@ -4,7 +4,7 @@ import configparser
 import pymysql
 
 from pytz import timezone
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 
 
@@ -84,7 +84,13 @@ if __name__ == '__main__':
 
         pdesigner = designer[1]
         now = datetime.now(timezone("Asia/Seoul"))
-        pdate = now.strftime("%Y.%m.%d.")  
+        day = timedelta(1)
+
+        new_date = now - day
+        pdate = new_date.strftime("%Y.%m.%d.")  
+
+        # pdate = '2020.09.08.'
+        print(pdate)
 
         rows = query_designers(pdesigner, pdate)
         cnt = 0
